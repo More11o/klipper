@@ -142,6 +142,7 @@ AUTOSAVE_HEADER = """
 
 class PrinterConfig:
     def __init__(self, printer):
+        self.backup_dir = "backup"
         self.printer = printer
         self.autosave = None
         self.deprecated = {}
@@ -421,11 +422,18 @@ class PrinterConfig:
         # Create new config file with temporary name and swap with main config
         logging.info("SAVE_CONFIG to '%s' (backup in '%s')",
                      cfgname, backup_name)
+        
+        try:
+            # Make sure backup directory exists, if the directory exists it will throw an Exception,
+            os.mkdir(self.backup_dir)
+        except Exception:
+            pass
+
         try:
             f = open(temp_name, 'w')
             f.write(data)
             f.close()
-            os.rename(cfgname, backup_name)
+            os.rename(cfgname, os.path.join(self.backup_dir, backup_name))
             os.rename(temp_name, cfgname)
         except:
             msg = "Unable to write config file during SAVE_CONFIG"
